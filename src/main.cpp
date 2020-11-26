@@ -2,9 +2,9 @@
 #include <FastLED.h>
 
 #define LED_PIN     5
-#define NUM_LEDS    14
+#define NUM_LEDS    20
 #define BRIGHTNESS  64
-#define LED_TYPE    WS2811
+#define LED_TYPE    WS2812B //WS2811
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
 
@@ -151,15 +151,27 @@ void ChangePalettePeriodically()
 }
 
 void loop() {
-    ChangePalettePeriodically();
-    
-    static uint8_t startIndex = 0;
-    startIndex = startIndex + 1; /* motion speed */
-    
-    FillLEDsFromPaletteColors( startIndex);
-    
-    FastLED.show();
-    FastLED.delay(1000 / UPDATES_PER_SECOND);
+   // Move a single white led 
+   for(int whiteLed = 1; whiteLed < NUM_LEDS; whiteLed = whiteLed + 1) {
+      // Turn our current led on to white, then show the leds
+      int firstLed = whiteLed - 1;
+      int lastLed = whiteLed + 1;
+      leds[firstLed] = CRGB::Blue;
+      leds[whiteLed] = CRGB::Red;
+      leds[lastLed] = CRGB::Blue;
+
+
+      // Show the leds (only one of which is set to white, from above)
+      FastLED.show();
+
+      // Wait a little bit
+      delay(50);
+
+      // Turn our current led back to black for the next loop around
+      leds[firstLed] = CRGB::Black;
+      leds[whiteLed] = CRGB::Black;
+      leds[lastLed] = CRGB::Black;
+  }
 }
 
 // Additionl notes on FastLED compact palettes:
