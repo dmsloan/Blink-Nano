@@ -1,164 +1,768 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Christmas for around window 
+// https://www.instructables.com/Easy-LED-Holiday-Light-Show-Wizards-in-Winter-WS28/  
+// Modified for platformIO                                        //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #include <Arduino.h>
 #include <FastLED.h>
-
-//
-//  "Pacifica"
-//  Gentle, blue-green ocean waves.
-//  December 2019, Mark Kriegsman and Mary Corey March.
-//  For Dan.
-//
+#define NUM_LEDS 150  // be sure to set this to the correct number of leds or it does not look good
+#define DATA_PIN 5
+#define BRIGHTNESS 255  // Max LED Brightness, 1-255
 
 #define FASTLED_ALLOW_INTERRUPTS 0
 FASTLED_USING_NAMESPACE
 
-#define DATA_PIN            5
-#define NUM_LEDS            300
 #define MAX_POWER_MILLIAMPS 500
 #define LED_TYPE            WS2812B
 #define COLOR_ORDER         GRB
 
-#define BRIGHTNESS  10
-
 #define UPDATES_PER_SECOND 100
 
-//////////////////////////////////////////////////////////////////////////
-
+// This is an array of leds.  One item for each led in your strip.
 CRGB leds[NUM_LEDS];
 
+uint8_t max_bright = BRIGHTNESS;
+
+
 void setup() {
-  delay( 3000); // 3 second delay for boot recovery, and a moment of silence
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection( TypicalLEDStrip );
-  FastLED.setMaxPowerInVoltsAndMilliamps( 5, MAX_POWER_MILLIAMPS);
+  // sanity check delay - allows reprogramming if accidently blowing power w/leds
+  delay(2000);
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  FastLED.setBrightness(max_bright);
+  set_max_power_in_volts_and_milliamps(5, MAX_POWER_MILLIAMPS);
 }
 
-//////////////////////////////////////////////////////////////////////////
-//
-// The code for this animation is more complicated than other examples, and 
-// while it is "ready to run", and documented in general, it is probably not 
-// the best starting point for learning.  Nevertheless, it does illustrate some
-// useful techniques.
-//
-//////////////////////////////////////////////////////////////////////////
-//
-// In this animation, there are four "layers" of waves of light.  
-//
-// Each layer moves independently, and each is scaled separately.
-//
-// All four wave layers are added together on top of each other, and then 
-// another filter is applied that adds "whitecaps" of brightness where the 
-// waves line up with each other more.  Finally, another pass is taken
-// over the led array to 'deepen' (dim) the blues and greens.
-//
-// The speed and scale and motion each layer varies slowly within independent 
-// hand-chosen ranges, which is why the code has a lot of low-speed 'beatsin8' functions
-// with a lot of oddly specific numeric ranges.
-//
-// These three custom blue-green color palettes were inspired by the colors found in
-// the waters off the southern coast of California, https://goo.gl/maps/QQgd97jjHesHZVxQ7
-//
-CRGBPalette16 pacifica_palette_1 = 
-    { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
-      0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x14554B, 0x28AA50 };
-CRGBPalette16 pacifica_palette_2 = 
-    { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
-      0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x0C5F52, 0x19BE5F };
-CRGBPalette16 pacifica_palette_3 = 
-    { 0x000208, 0x00030E, 0x000514, 0x00061A, 0x000820, 0x000927, 0x000B2D, 0x000C33, 
-      0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
+void conductorIntro() {
+  int i = 0;
+  while (i < 3) {
+    fill_solid(leds, NUM_LEDS, CRGB::Red);
+    FastLED.delay(10);
+    FastLED.clear();
+    FastLED.delay(802);
+    i++;
+  }
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(10);
+  FastLED.clear();
+  FastLED.delay(802);
+}
 
-void addGlitter( fract8 chanceOfGlitter) 
-{
-  if( random8() < chanceOfGlitter) {
-    leds[ random16(NUM_LEDS) ] += CRGB::White;
+void whiteFlashes7() {
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(185);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(405);
+  int i = 0;
+  while (i < 5) {
+    fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+    FastLED.delay(20);
+    FastLED.clear();
+    FastLED.delay(185);
+
+    fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+    FastLED.delay(20);
+    FastLED.clear();
+    FastLED.delay(185);
+
+    fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+    FastLED.delay(20);
+    FastLED.clear();
+    FastLED.delay(405);
+    i++;
+  }
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(185);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(75);
+}
+
+
+
+void incrementalReplacement() {
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(40);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(40);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(40);
+
+  fill_solid(leds, NUM_LEDS, CRGB(200, 172, 68) );
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(40);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(40);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(40);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(140);
+  FastLED.clear();
+  FastLED.delay(100);
+}
+
+
+
+void incrementalWhiteLed7() {
+  for (int whiteLed = 0; whiteLed < NUM_LEDS * 0.85714285714; whiteLed = whiteLed + NUM_LEDS / 7) {
+    // Turn our current led on to white, then show the leds
+    leds[whiteLed] = CRGB( 200, 172, 68) ;
+
+    // Show the leds (only one of which is set to white, from above)
+    FastLED.show();
+
+    // Wait a little bit
+    delay(18);
+
+    // Turn our current led back to black for the next loop around
+    leds[whiteLed] = CRGB::Black;
+    FastLED.delay(185);
   }
 }
-// Add one layer of waves into the led array
-void pacifica_one_layer( CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
-{
-  uint16_t ci = cistart;
-  uint16_t waveangle = ioff;
-  uint16_t wavescale_half = (wavescale / 2) + 20;
-  for( uint16_t i = 0; i < NUM_LEDS; i++) {
-    waveangle += 250;
-    uint16_t s16 = sin16( waveangle ) + 32768;
-    uint16_t cs = scale16( s16 , wavescale_half ) + wavescale_half;
-    ci += cs;
-    uint16_t sindex16 = sin16( ci) + 32768;
-    uint8_t sindex8 = scale16( sindex16, 240);
-    CRGB c = ColorFromPalette( p, sindex8, bri, LINEARBLEND);
-    leds[i] += c;
+
+
+
+void convergeThenSeparateWhite() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB( 200, 172, 68) ;
+    leds[NUM_LEDS - whiteLed] = CRGB( 200, 172, 68) ;
+    FastLED.show();
+    delay(6);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
   }
 }
 
-// Add extra 'white' to areas where the four layers of light have lined up brightly
-void pacifica_add_whitecaps()
-{
-  uint8_t basethreshold = beatsin8( 9, 55, 65);
-  uint8_t wave = beat8( 7 );
-  
-  for( uint16_t i = 0; i < NUM_LEDS; i++) {
-    uint8_t threshold = scale8( sin8( wave), 20) + basethreshold;
-    wave += 7;
-    uint8_t l = leds[i].getAverageLight();
-    if( l > threshold) {
-      uint8_t overage = l - threshold;
-      uint8_t overage2 = qadd8( overage, overage);
-      leds[i] += CRGB( overage, overage2, qadd8( overage2, overage2));
-    }
+
+
+void convergeThenSeparateRed() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB::Red;
+    leds[NUM_LEDS - whiteLed] = CRGB::Red;
+    FastLED.show();
+    delay(6);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
   }
 }
 
-// Deepen the blues and greens
-void pacifica_deepen_colors()
-{
-  for( uint16_t i = 0; i < NUM_LEDS; i++) {
-    leds[i].blue = scale8( leds[i].blue,  145); 
-    leds[i].green= scale8( leds[i].green, 200); 
-    leds[i] |= CRGB( 2, 5, 7);
+
+
+void convergeThenSeparateGreen() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB::Green;
+    leds[NUM_LEDS - whiteLed] = CRGB::Green;
+    FastLED.show();
+    delay(6);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
   }
 }
 
-void pacifica_loop()
-{
-  // Increment the four "color index start" counters, one for each wave layer.
-  // Each is incremented at a different speed, and the speeds vary over time.
-  static uint16_t sCIStart1, sCIStart2, sCIStart3, sCIStart4;
-  static uint32_t sLastms = 0;
-  uint32_t ms = GET_MILLIS();
-  uint32_t deltams = ms - sLastms;
-  sLastms = ms;
-  uint16_t speedfactor1 = beatsin16(3, 179, 269);
-  uint16_t speedfactor2 = beatsin16(4, 179, 269);
-  uint32_t deltams1 = (deltams * speedfactor1) / 256;
-  uint32_t deltams2 = (deltams * speedfactor2) / 256;
-  uint32_t deltams21 = (deltams1 + deltams2) / 2;
-  sCIStart1 += (deltams1 * beatsin88(1011,10,13));
-  sCIStart2 -= (deltams21 * beatsin88(777,8,11));
-  sCIStart3 -= (deltams1 * beatsin88(501,5,7));
-  sCIStart4 -= (deltams2 * beatsin88(257,4,6));
 
-  // Clear out the LED array to a dim background blue-green
-  fill_solid( leds, NUM_LEDS, CRGB( 2, 6, 10));
 
-  // Render each of four layers, with different scales and speeds, that vary over time
-  pacifica_one_layer( pacifica_palette_1, sCIStart1, beatsin16( 3, 11 * 256, 14 * 256), beatsin8( 10, 70, 130), 0-beat16( 301) );
-  pacifica_one_layer( pacifica_palette_2, sCIStart2, beatsin16( 4,  6 * 256,  9 * 256), beatsin8( 17, 40,  80), beat16( 401) );
-  pacifica_one_layer( pacifica_palette_3, sCIStart3, 6 * 256, beatsin8( 9, 10,38), 0-beat16(503));
-  pacifica_one_layer( pacifica_palette_3, sCIStart4, 5 * 256, beatsin8( 8, 10,28), beat16(601));
-
-  // Add brighter 'whitecaps' where the waves lines up more
-  pacifica_add_whitecaps();
-
-  // Deepen the blues and greens a bit
-  pacifica_deepen_colors();
+void slideLeftToRight() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB( 200, 172, 68) ;
+    FastLED.show();
+    delay(3.9);
+    leds[whiteLed] = CRGB::Black;
+    i++;
+  }
 }
 
-void loop()
-{
-  EVERY_N_MILLISECONDS( 20) {
-    pacifica_loop();
-    addGlitter(150);
+
+
+void flashWhite() {
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.show();
+  FastLED.delay(300);
+  FastLED.clear();
+  FastLED.delay(100);
+}
+
+
+
+void slideRightToLeft() {
+  int i = NUM_LEDS;
+  for (int whiteLed = i; whiteLed > 0; whiteLed--) {
+    leds[whiteLed] = CRGB( 200, 172, 68) ;
+    FastLED.show();
+    delay(3.9);
+    leds[whiteLed] = CRGB::Black;
+    i++;
+  }
+}
+
+
+
+void Flashes() {
+  // put your main code here, to run repeatedly:
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68)  );
+  FastLED.delay(40);
+  FastLED.clear();
+  FastLED.delay(630);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(40);
+  FastLED.clear();
+  FastLED.delay(162);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(40);
+  FastLED.clear();
+  FastLED.delay(630);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(40);
+  FastLED.clear();
+  FastLED.delay(162);
+}
+
+
+
+void halfColorSweepsAlteratingInOut() {
+  for (int i = 0; i <= NUM_LEDS / 2; i = i + 2) {
+    leds[i] = CRGB::Red;
+    leds[i + 1] = CRGB::Red;
+    delayMicroseconds(5000);
     FastLED.show();
   }
+  for (int i = NUM_LEDS; i >= NUM_LEDS / 2; i = i - 2) {
+    leds[i] = CRGB::Green;
+    leds[i - 1] = CRGB::Green;
+    delayMicroseconds(5000);
+    FastLED.show();
+  }
+  for (int i = 0; i <= NUM_LEDS / 2; i = i + 2) {
+    leds[i] = CRGB::Green;
+    leds[i - 1] = CRGB::Green;
+    delayMicroseconds(5000);
+    FastLED.show();
+  }
+  for (int i = NUM_LEDS; i >= NUM_LEDS / 2; i = i - 2) {
+    leds[i] = CRGB::Red;
+    leds[i - 1] = CRGB::Red;
+    delayMicroseconds(5000);
+    FastLED.show();
+  }
+  FastLED.clear();
+}
+
+
+
+void RandomFlashes() {
+  long randNumber1;
+  long randNumber2;
+  long randNumber3;
+  long randNumber4;
+
+  for (int i = 0; i < 400; i++) {
+    randNumber1 = random(0, NUM_LEDS + 1);
+    leds[randNumber1] = CRGB( 200, 172, 68) ;
+
+    randNumber2 = random(0, NUM_LEDS + 1);
+    leds[randNumber2] = CRGB( 200, 172, 68) ;
+
+    randNumber3 = random(0, NUM_LEDS + 1);
+    leds[randNumber3] = CRGB( 200, 172, 68) ;
+
+    randNumber4 = random(0, NUM_LEDS + 1);
+    leds[randNumber4] = CRGB( 200, 172, 68) ;
+
+    FastLED.show();
+    FastLED.delay(2);
+    FastLED.clear();
+  }
+}
+
+
+void Color3RandomFlashes() {
+  long randNumber1;
+  long randNumber2;
+  long randNumber3;
+  long randNumber4;
+
+  for (int i = 0; i < 133; i++) {
+    randNumber1 = random(0, NUM_LEDS + 1);
+    leds[randNumber1] = CRGB( 200, 172, 68) ;
+
+    randNumber2 = random(0, NUM_LEDS + 1);
+    leds[randNumber2] = CRGB( 200, 172, 68) ;
+
+    randNumber3 = random(0, NUM_LEDS + 1);
+    leds[randNumber3] = CRGB( 200, 172, 68) ;
+
+    randNumber4 = random(0, NUM_LEDS + 1);
+    leds[randNumber4] = CRGB( 200, 172, 68) ;
+
+    FastLED.show();
+    FastLED.delay(2);
+    FastLED.clear();
+  }
+  for (int i = 0; i < 133; i++) {
+    randNumber1 = random(0, NUM_LEDS + 1);
+    leds[randNumber1] = CRGB::Red;
+
+    randNumber2 = random(0, NUM_LEDS + 1);
+    leds[randNumber2] = CRGB::Red;
+
+    randNumber3 = random(0, NUM_LEDS + 1);
+    leds[randNumber3] = CRGB::Red;
+
+    randNumber4 = random(0, NUM_LEDS + 1);
+    leds[randNumber4] = CRGB::Red;
+
+    FastLED.show();
+    FastLED.delay(2);
+    FastLED.clear();
+  }
+  for (int i = 0; i < 134; i++) {
+    randNumber1 = random(0, NUM_LEDS + 1);
+    leds[randNumber1] = CRGB::Green;
+
+    randNumber2 = random(0, NUM_LEDS + 1);
+    leds[randNumber2] = CRGB::Green;
+
+    randNumber3 = random(0, NUM_LEDS + 1);
+    leds[randNumber3] = CRGB::Green;
+
+    randNumber4 = random(0, NUM_LEDS + 1);
+    leds[randNumber4] = CRGB::Green;
+
+    FastLED.show();
+    FastLED.delay(2);
+    FastLED.clear();
+  }
+}
+
+
+void slowHalfColorSweepsAlteratingInOut() {
+  for (int i = 0; i <= NUM_LEDS / 2; i = i + 2) {
+    leds[i] = CRGB::Red;
+    leds[i + 1] = CRGB::Red;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  for (int i = NUM_LEDS; i >= NUM_LEDS / 2; i = i - 2) {
+    leds[i] = CRGB::Green;
+    leds[i - 1] = CRGB::Green;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  for (int i = 0; i <= NUM_LEDS / 2; i = i + 2) {
+    leds[i] = CRGB::Green;
+    leds[i - 1] = CRGB::Green;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  for (int i = NUM_LEDS; i >= NUM_LEDS / 2; i = i - 2) {
+    leds[i] = CRGB::Red;
+    leds[i - 1] = CRGB::Red;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+
+  for (int i = 0; i <= NUM_LEDS / 2; i = i + 2) {
+    leds[i] = CRGB::Red;
+    leds[i + 1] = CRGB( 200, 172, 68) ;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  for (int i = NUM_LEDS; i >= NUM_LEDS / 2; i = i - 2) {
+    leds[i] = CRGB::Red;
+    leds[i - 1] = CRGB( 200, 172, 68) ;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  for (int i = 0; i <= NUM_LEDS / 2; i = i + 2) {
+    leds[i] = CRGB::Green;
+    leds[i - 1] = CRGB::Red;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  for (int i = NUM_LEDS; i >= NUM_LEDS / 2; i = i - 2) {
+    leds[i] = CRGB::Green;
+    leds[i - 1] = CRGB::Red;
+    delayMicroseconds(5500);
+    FastLED.show();
+  }
+  FastLED.clear();
+}
+
+
+
+void slowSlideLeftToRight() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB( 200, 172, 68) ;
+    FastLED.show();
+    delay(6000 / NUM_LEDS);
+    leds[whiteLed] = CRGB::Black;
+    i++;
+  }
+}
+
+
+
+void slowConvergeThenSeparateRed() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB::Red;
+    leds[NUM_LEDS - whiteLed] = CRGB::Red;
+    FastLED.show();
+    delayMicroseconds(6100);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
+  }
+}
+
+
+
+void slowConvergeThenSeparateGreen() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB::Green;
+    leds[NUM_LEDS - whiteLed] = CRGB::Green;
+    FastLED.show();
+    delayMicroseconds(6100);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
+  }
+}
+
+
+
+void slowConvergeThenSeparateBlue() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB::Blue;
+    leds[NUM_LEDS - whiteLed] = CRGB::Blue;
+    FastLED.show();
+    delayMicroseconds(6100);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
+  }
+}
+
+
+
+void slowConvergeThenSeparateWhite() {
+  int i = 0;
+  for (int whiteLed = 0; whiteLed < NUM_LEDS; whiteLed++) {
+    leds[whiteLed] = CRGB( 200, 172, 68);
+    leds[NUM_LEDS - whiteLed] = CRGB( 200, 172, 68);
+    FastLED.show();
+    delayMicroseconds(6100);
+    leds[whiteLed] = CRGB::Black;
+    leds[NUM_LEDS - whiteLed] = CRGB::Black ;
+    i++;
+  }
+}
+
+
+
+void twinkle() {
+  delay(300);
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(400);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(790);
+  FastLED.clear();
+  FastLED.delay(20);
+
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(400);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(790);
+  FastLED.clear();
+  FastLED.delay(20);
+
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(190);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(190);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(700);
+  FastLED.clear();
+  FastLED.delay(220);
+
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(400);
+
+  fill_solid(leds, NUM_LEDS, CRGB( 200, 172, 68) );
+  FastLED.delay(790);
+  FastLED.clear();
+  FastLED.delay(20);
+
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(180);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(400);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(790);
+  FastLED.clear();
+  FastLED.delay(20);
+
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(190);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(190);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.delay(20);
+  FastLED.clear();
+  FastLED.delay(410);
+
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.delay(300);
+  FastLED.clear();
+  FastLED.delay(200);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  conductorIntro();
+  // 0:00
+  whiteFlashes7();
+
+  incrementalWhiteLed7();
+
+  whiteFlashes7();
+
+  // incrementalWhiteLed7();
+  incrementalReplacement();
+
+  convergeThenSeparateWhite();
+  convergeThenSeparateRed();
+  convergeThenSeparateGreen();
+
+  flashWhite();
+
+  // incrementalWhiteLed7();
+  incrementalReplacement();
+
+  convergeThenSeparateWhite();
+  convergeThenSeparateRed();
+  convergeThenSeparateGreen();
+
+  flashWhite();
+
+  slideLeftToRight();
+
+  flashWhite();
+
+  slideRightToLeft();
+  // 0:28
+  Flashes();
+
+  halfColorSweepsAlteratingInOut();
+
+  RandomFlashes();
+  // 0:37
+  flashWhite();
+
+  slideRightToLeft();
+
+  Color3RandomFlashes();
+
+  flashWhite();
+
+  slideLeftToRight();
+
+  flashWhite();
+
+  slideRightToLeft();
+
+  Flashes();
+
+  slowHalfColorSweepsAlteratingInOut();
+  // 0:50
+
+  slowConvergeThenSeparateRed();
+
+  slowConvergeThenSeparateGreen();
+
+  slowConvergeThenSeparateBlue();
+
+  slowConvergeThenSeparateWhite();
+
+  twinkle();
+  // 1:09
+  flashWhite();
+
+  slideLeftToRight();
+
+  flashWhite();
+
+  slideRightToLeft();
+  
+  Flashes();
+  // 1:14
+  halfColorSweepsAlteratingInOut();
+
+  convergeThenSeparateWhite();
+  convergeThenSeparateRed();
+  convergeThenSeparateGreen();
+
+  flashWhite();
+
+  incrementalReplacement();
+
+  Color3RandomFlashes();
+
+  flashWhite();
+
+  incrementalReplacement();
+
+  flashWhite();
+
+  incrementalReplacement();
 }
