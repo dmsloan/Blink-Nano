@@ -7,8 +7,8 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
-#define NUM_LEDS 150  // be sure to set this to the correct number of leds or it does not look good
-#define DATA_PIN 5
+#define NUM_LEDS 16  // be sure to set this to the correct number of leds or it does not look good
+#define DATA_PIN 33
 #define BRIGHTNESS 255  // Max LED Brightness, 1-255
 
 #define FASTLED_ALLOW_INTERRUPTS 0
